@@ -5,14 +5,18 @@ import App from './App'
 import router from './router'
 import Firebase from 'firebase'
 import Vuefire from 'vuefire'
+import BootstrapVue from 'bootstrap-vue'
+import 'bootstrap/dist/css/bootstrap.css'
+import 'bootstrap-vue/dist/bootstrap-vue.css'
 
 Vue.config.productionTip = false
 Vue.use(Vuefire)
+Vue.use(BootstrapVue)
 
 let app
 // Initialize Firebase
 let config = {
-  apiKey: '',
+  apiKey: process.env.API_KEY,
   authDomain: 'poli-c41fc.firebaseapp.com',
   databaseURL: 'https://poli-c41fc.firebaseio.com',
   projectId: 'poli-c41fc',

@@ -28,6 +28,16 @@
         </form>
       </div>
     </div>
+    <div>
+      <b-alert
+        :show="dismissCountDown"
+        dismissible
+        variant="success"
+        @dismissed="dismissCountDown=0"
+        @dismiss-count-down="countDownChanged">
+        This alert will dismiss after {{dismissCountDown}} seconds...
+      </b-alert>
+    </div>
 </div>
 </template>
 
@@ -39,25 +49,34 @@ export default {
   name: 'Hello',
   data () {
     return {
-      msg: 'Bienvenido a gestión policial',
+      msg: 'Bienvenido',
+      dismissSecs: 5,
+      dismissCountDown: 0,
       newAgent: {
-        name: 'Nenedan',
-        surname: 'Hernandez',
-        alias: 'culebra'
+        name: '',
+        surname: '',
+        alias: ''
       }
     }
   },
   methods: {
+    countDownChanged (dismissCountDown) {
+      this.dismissCountDown = dismissCountDown
+    },
+    showAlert () {
+      this.dismissCountDown = this.dismissSecs
+    },
     logout: function () {
       Firebase.auth().signOut().then(() => {
         this.$router.replace('login')
       })
     },
     addAgent: function () {
+      var that = this
       db.collection('agents').add(this.newAgent)
         .then(
           function (docRef) {
-            alert('Usuario Insertado correctamente')
+            that.showAlert()
           },
           function (err) {
             alert('Error al insertar... ' + err.message)

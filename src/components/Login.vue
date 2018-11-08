@@ -1,8 +1,8 @@
 <template>
   <div class="login">
-    <h3>Gestión Policial</h3>
+    <h3>Gestión Login</h3>
     <input type="text" v-model="email" placeholder="Email"><br>
-    <input type="text" v-model="password" placeholder="Password"><br><br>
+    <input type="password" v-model="password" placeholder="Password"><br><br>
     <button v-on:click="signIn">Login</button><br><br>
     <router-link to="/sign-up">¿No tienes cuenta?</router-link>
   </div>
