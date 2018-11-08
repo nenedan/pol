@@ -1,11 +1,38 @@
 <template>
 <div>
-  <div class="hello">
-    <h1>{{ msg }}</h1>
-    <h2>Essential Links</h2>
+  <div class="agents">
     <button v-on:click="logout">Logout</button>
   </div>
   <hr>
+  <v-form v-model="valid" lazy-validation>
+    <v-text-field
+      v-model="newAgent.name"
+      :counter="10"
+      label="Nombre"
+      required
+    ></v-text-field>
+    <v-text-field
+      v-model="newAgent.surname"
+      label="Apellido 1"
+      required
+    ></v-text-field>
+    <v-text-field
+      v-model="newAgent.secondSurname"
+      label="Apellido 2"
+      required
+    ></v-text-field>
+    <v-text-field
+      v-model="newAgent.idAgent"
+      label="Identificación"
+      required
+    ></v-text-field>
+    <v-btn
+      :disabled="!valid"
+      @click="addAgent"
+    >
+      Guardar
+    </v-btn>
+  </v-form>
   <div class="panel panel-default">
       <div class="panel-heading">
         <h3 class="panel-title">Add New Agents</h3>
@@ -18,7 +45,7 @@
           </div>
           <div class="form-group">
             <label for="agentSurname">Surname:</label>
-            <input type="text" id="agentSurnamer" class="form-control" v-model="newAgent.surname">
+            <input type="text" id="agentSurname" class="form-control" v-model="newAgent.surname">
           </div>
           <div class="form-group">
             <label for="agentAlias">Alias:</label>
@@ -28,16 +55,6 @@
         </form>
       </div>
     </div>
-    <div>
-      <b-alert
-        :show="dismissCountDown"
-        dismissible
-        variant="success"
-        @dismissed="dismissCountDown=0"
-        @dismiss-count-down="countDownChanged">
-        This alert will dismiss after {{dismissCountDown}} seconds...
-      </b-alert>
-    </div>
 </div>
 </template>
 
@@ -46,7 +63,7 @@ import Firebase from 'firebase'
 import { db } from '../main'
 
 export default {
-  name: 'Hello',
+  name: 'Agents',
   data () {
     return {
       msg: 'Bienvenido',
@@ -54,29 +71,24 @@ export default {
       dismissCountDown: 0,
       newAgent: {
         name: '',
+        secondSurname: '',
         surname: '',
         alias: ''
-      }
+      },
+      valid: true
     }
   },
   methods: {
-    countDownChanged (dismissCountDown) {
-      this.dismissCountDown = dismissCountDown
-    },
-    showAlert () {
-      this.dismissCountDown = this.dismissSecs
-    },
     logout: function () {
       Firebase.auth().signOut().then(() => {
         this.$router.replace('login')
       })
     },
     addAgent: function () {
-      var that = this
       db.collection('agents').add(this.newAgent)
         .then(
           function (docRef) {
-            that.showAlert()
+            alert('Insertado correctamente')
           },
           function (err) {
             alert('Error al insertar... ' + err.message)

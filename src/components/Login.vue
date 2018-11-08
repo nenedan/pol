@@ -26,7 +26,7 @@ export default {
         .then(
           function (user) {
             alert('Te has conectado correctamente')
-            that.$router.replace('hello')
+            that.$router.replace('agents')
           },
           function (err) {
             alert('Al ha salido mal... ' + err.message)
