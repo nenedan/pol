@@ -1,11 +1,33 @@
 <template>
-  <div class="login">
-    <h3>Gestión Login</h3>
-    <input type="text" v-model="email" placeholder="Email"><br>
-    <input type="password" v-model="password" placeholder="Password"><br><br>
-    <button v-on:click="signIn">Login</button><br><br>
-    <router-link to="/sign-up">¿No tienes cuenta?</router-link>
-  </div>
+  <v-layout align-center justify-center row fill-height>
+    <div class="login-form">
+      <h3>Gestión Login</h3>
+      <br>
+      <v-form ref="form" v-model="valid" lazy-validation>
+        <v-text-field
+          v-model="email"
+          :rules="emailRules"
+          label="E-mail"
+          required
+        ></v-text-field>
+        <v-text-field
+          type="password"
+          v-model="password"
+          :rules="passwordRules"
+          label="Contraseña"
+          required
+        ></v-text-field>
+        <br>
+        <v-btn
+          :disabled="!valid"
+          @click="signIn"
+        >
+          Login
+        </v-btn>
+      </v-form><br>
+      <router-link to="/sign-up">¿No tienes cuenta?</router-link>
+    </div>
+  </v-layout>
 </template>
 
 <script>
@@ -16,29 +38,47 @@ export default {
   data: function () {
     return {
       email: '',
-      password: ''
+      emailRules: [
+        v => !!v || 'El email es obligatorio',
+        v => /.+@.+/.test(v) || 'El email debe ser válido'
+      ],
+      password: '',
+      passwordRules: [
+        v => !!v || 'La contraseña es obligatoria',
+        v => (v && v.length === 6) || 'La contraseña debe tener al menos 6 caractéres'
+      ],
+      valid: true
     }
   },
   methods: {
     signIn: function () {
-      var that = this /* Check this */
-      Firebase.auth().signInWithEmailAndPassword(this.email, this.password)
-        .then(
-          function (user) {
-            alert('Te has conectado correctamente')
-            that.$router.replace('agents')
-          },
-          function (err) {
-            alert('Al ha salido mal... ' + err.message)
-          }
-        )
+      if (this.$refs.form.validate()) {
+        var that = this /* Check this */
+        Firebase.auth().signInWithEmailAndPassword(this.email, this.password)
+          .then(
+            function (user) {
+              alert('Te has conectado correctamente')
+              that.$router.replace('agents')
+            },
+            function (err) {
+              alert('Al ha salido mal... ' + err.message)
+            }
+          )
+      }
     }
-
   }
 
 }
 </script>
 
-<style scoped>
+<style lang="sass" scoped>
+@import 'src/assets/main.scss'
 
+.login-form
+  border-top: 1px solid $plain-color;
+  border-bottom: 1px solid $plain-color;
+  padding: 30px 50px;
+  border-radius: -5px;
+.login-form input
+  font-size: 20px;
 </style>
