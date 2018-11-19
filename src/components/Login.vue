@@ -45,7 +45,7 @@ export default {
       password: '',
       passwordRules: [
         v => !!v || 'La contraseña es obligatoria',
-        v => (v && v.length === 6) || 'La contraseña debe tener al menos 6 caractéres'
+        v => (v && v.length >= 6) || 'La contraseña debe tener al menos 6 caractéres'
       ],
       valid: true
     }

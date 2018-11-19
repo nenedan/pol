@@ -1,60 +1,48 @@
 <template>
 <div>
+  <br>
   <div class="agents">
-    <button v-on:click="logout">Logout</button>
-  </div>
-  <hr>
-  <v-form v-model="valid" lazy-validation>
-    <v-text-field
-      v-model="newAgent.name"
-      :counter="10"
-      label="Nombre"
-      required
-    ></v-text-field>
-    <v-text-field
-      v-model="newAgent.surname"
-      label="Apellido 1"
-      required
-    ></v-text-field>
-    <v-text-field
-      v-model="newAgent.secondSurname"
-      label="Apellido 2"
-      required
-    ></v-text-field>
-    <v-text-field
-      v-model="newAgent.idAgent"
-      label="Identificación"
-      required
-    ></v-text-field>
-    <v-btn
-      :disabled="!valid"
-      @click="addAgent"
-    >
-      Guardar
+    <v-btn @click="logout">
+      Logout
     </v-btn>
-  </v-form>
-  <div class="panel panel-default">
-      <div class="panel-heading">
-        <h3 class="panel-title">Add New Agents</h3>
-      </div>
-      <div class="panel-body">
-         <form id="form" class="form-inline" v-on:submit.prevent="addAgent">
-          <div class="form-group">
-            <label for="agentName">Name:</label>
-            <input type="text" id="agentName" class="form-control" v-model="newAgent.name">
-          </div>
-          <div class="form-group">
-            <label for="agentSurname">Surname:</label>
-            <input type="text" id="agentSurname" class="form-control" v-model="newAgent.surname">
-          </div>
-          <div class="form-group">
-            <label for="agentAlias">Alias:</label>
-            <input type="text" id="agentAlias" class="form-control" v-model="newAgent.alias">
-          </div>
-          <input type="submit" class="btn btn-primary" value="Add Agent">
-        </form>
-      </div>
-    </div>
+  </div>
+  <br>
+  <hr>
+  <br>
+  <v-container grid-list-md text-xs-center>
+    <v-layout row wrap>
+      <v-flex sm4 xs12>
+        <h3 class="panel-title">Add New Ag</h3>
+        <v-form ref="form" v-model="valid" lazy-validation>
+          <v-text-field v-model="newAgent.name" :rules="emptyTextRules" label="Nombre" required></v-text-field>
+          <v-text-field v-model="newAgent.surname" :rules="emptyTextRules" label="Apellido 1" required></v-text-field>
+          <v-text-field v-model="newAgent.secondSurname" :rules="emptyTextRules" label="Apellido 2" required></v-text-field>
+          <v-text-field v-model="newAgent.idAgent" :rules="emptyTextRules" label="Identificación" required></v-text-field>
+          <v-text-field v-model="newAgent.alias" :rules="emptyTextRules" label="Alias" required></v-text-field>
+          <v-btn :disabled="!valid" @click="addAgent">
+            Guardar
+          </v-btn>
+        </v-form>
+      </v-flex>
+      <v-flex sm8 xs12>
+        <h3 class="panel-title">Ags</h3>
+        <br>
+        <v-data-table
+          :headers="headers"
+          :items="agents"
+          class="elevation-1"
+        >
+          <template slot="items" slot-scope="props">
+            <td>{{ props.item.idAgent }}</td>
+            <td>{{ props.item.name }}</td>
+            <td>{{ props.item.surname }}</td>
+            <td>{{ props.item.secondSurname }}</td>
+            <td>{{ props.item.alias }}</td>
+          </template>
+        </v-data-table>
+      </v-flex>
+    </v-layout>
+  </v-container>
 </div>
 </template>
 
@@ -66,10 +54,20 @@ export default {
   name: 'Agents',
   data () {
     return {
+      agents: [],
       msg: 'Bienvenido',
-      dismissSecs: 5,
-      dismissCountDown: 0,
+      headers: [
+        { text: 'Id', value: 'id' },
+        { text: 'Nombre', value: 'nombre' },
+        { text: 'Apellido 1', value: 'apellido-1' },
+        { text: 'Apellido 2', value: 'apellido-2' },
+        { text: 'Alias', value: 'alias' }
+      ],
+      emptyTextRules: [
+        v => !!v || 'Debe rellenar este campo'
+      ],
       newAgent: {
+        idAgent: '',
         name: '',
         secondSurname: '',
         surname: '',
@@ -85,16 +83,27 @@ export default {
       })
     },
     addAgent: function () {
-      db.collection('agents').add(this.newAgent)
-        .then(
-          function (docRef) {
-            alert('Insertado correctamente')
+      if (this.$refs.form.validate()) {
+        db.collection('agents').add(this.newAgent)
+          .then((docRef) => {
+            this.fetchAgents()
           },
           function (err) {
             alert('Error al insertar... ' + err.message)
-          }
-        )
+          })
+      }
+    },
+    fetchAgents: function () {
+      db.collection('agents').get()
+        .then((querySnapshot) => {
+          querySnapshot.forEach((doc) => {
+            this.agents.push(doc.data())
+          })
+        })
     }
+  },
+  created: function () {
+    this.fetchAgents()
   }
 }
 </script>
