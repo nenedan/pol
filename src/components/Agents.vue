@@ -11,7 +11,7 @@
   <br>
   <v-container grid-list-md text-xs-center>
     <v-layout row wrap>
-      <v-flex sm4 xs12>
+      <v-flex sm12 xs12>
         <h3 class="panel-title">Add New Ag</h3>
         <v-form ref="form" v-model="valid" lazy-validation>
           <v-text-field v-model="newAgent.name" :rules="emptyTextRules" label="Nombre" required></v-text-field>
@@ -24,7 +24,8 @@
           </v-btn>
         </v-form>
       </v-flex>
-      <v-flex sm8 xs12>
+      <v-flex sm12 xs12>
+        <br><br>
         <h3 class="panel-title">Ags</h3>
         <br>
         <v-data-table
@@ -33,11 +34,12 @@
           class="elevation-1"
         >
           <template slot="items" slot-scope="props">
-            <td>{{ props.item.idAgent }}</td>
-            <td>{{ props.item.name }}</td>
-            <td>{{ props.item.surname }}</td>
-            <td>{{ props.item.secondSurname }}</td>
-            <td>{{ props.item.alias }}</td>
+            <td>{{ props.item.data.idAgent }}</td>
+            <td>{{ props.item.data.name }}</td>
+            <td>{{ props.item.data.surname }}</td>
+            <td>{{ props.item.data.secondSurname }}</td>
+            <td>{{ props.item.data.alias }}</td>
+            <td><v-icon @click="deleteAgent(props.item.docId)">delete</v-icon></td>
           </template>
         </v-data-table>
       </v-flex>
@@ -61,7 +63,8 @@ export default {
         { text: 'Nombre', value: 'nombre' },
         { text: 'Apellido 1', value: 'apellido-1' },
         { text: 'Apellido 2', value: 'apellido-2' },
-        { text: 'Alias', value: 'alias' }
+        { text: 'Alias', value: 'alias' },
+        { text: '¿Borrar?', value: 'borrar' }
       ],
       emptyTextRules: [
         v => !!v || 'Debe rellenar este campo'
@@ -94,11 +97,22 @@ export default {
       }
     },
     fetchAgents: function () {
+      this.agents = []
       db.collection('agents').get()
         .then((querySnapshot) => {
           querySnapshot.forEach((doc) => {
-            this.agents.push(doc.data())
+            this.agents.push({ docId: doc.id, data: doc.data() })
           })
+          console.log(this.agents)
+        })
+    },
+    deleteAgent: function (docId) {
+      db.collection('agents').doc(docId).delete()
+        .then(() => {
+          this.fetchAgents()
+        })
+        .catch((error) => {
+          console.error('Error removing document: ', error)
         })
     }
   },
