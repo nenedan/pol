@@ -11,21 +11,23 @@
   <br>
   <v-container grid-list-md text-xs-center>
     <v-layout row wrap>
-      <v-flex sm12 xs12>
+      <v-flex sm4 xs12>
         <h3 class="panel-title">Add New Ag</h3>
         <v-form ref="form" v-model="valid" lazy-validation>
           <v-text-field v-model="newAgent.name" :rules="emptyTextRules" label="Nombre" required></v-text-field>
           <v-text-field v-model="newAgent.surname" :rules="emptyTextRules" label="Apellido 1" required></v-text-field>
           <v-text-field v-model="newAgent.secondSurname" :rules="emptyTextRules" label="Apellido 2" required></v-text-field>
-          <v-text-field v-model="newAgent.idAgent" :rules="emptyTextRules" label="Identificación" required></v-text-field>
+          <v-text-field v-model.number="newAgent.idAgent" type="number" :rules="emptyTextRules" label="Identificación" required></v-text-field>
           <v-text-field v-model="newAgent.alias" :rules="emptyTextRules" label="Alias" required></v-text-field>
-          <v-btn :disabled="!valid" @click="addAgent">
+          <v-btn :disabled="!valid" @click="handleAgent">
             Guardar
+          </v-btn>
+          <v-btn @click="cleanForm">
+            Limpiar
           </v-btn>
         </v-form>
       </v-flex>
-      <v-flex sm12 xs12>
-        <br><br>
+      <v-flex sm8 xs12>
         <h3 class="panel-title">Ags</h3>
         <br>
         <v-data-table
@@ -34,12 +36,16 @@
           class="elevation-1"
         >
           <template slot="items" slot-scope="props">
-            <td>{{ props.item.data.idAgent }}</td>
-            <td>{{ props.item.data.name }}</td>
-            <td>{{ props.item.data.surname }}</td>
-            <td>{{ props.item.data.secondSurname }}</td>
-            <td>{{ props.item.data.alias }}</td>
-            <td><v-icon @click="deleteAgent(props.item.docId)">delete</v-icon></td>
+            <td class="text-xs-right">{{ props.item.data.idAgent }}</td>
+            <td class="text-xs-right">{{ props.item.data.name }}</td>
+            <td class="text-xs-right">{{ props.item.data.surname }}</td>
+            <td class="text-xs-right">{{ props.item.data.secondSurname }}</td>
+            <td class="text-xs-right">{{ props.item.data.alias }}</td>
+            <td>
+              <v-btn flat icon @click='deleteAgent(props.item.docId)'>
+                <v-icon>delete</v-icon>
+              </v-btn>
+            </td>
           </template>
         </v-data-table>
       </v-flex>
@@ -59,12 +65,16 @@ export default {
       agents: [],
       msg: 'Bienvenido',
       headers: [
-        { text: 'Id', value: 'id' },
-        { text: 'Nombre', value: 'nombre' },
-        { text: 'Apellido 1', value: 'apellido-1' },
-        { text: 'Apellido 2', value: 'apellido-2' },
-        { text: 'Alias', value: 'alias' },
-        { text: '¿Borrar?', value: 'borrar' }
+        { text: 'Id', value: false, sortable: true },
+        { text: 'Nombre', value: false, sortable: false },
+        { text: 'Apellido 1', value: false, sortable: false },
+        { text: 'Apellido 2', value: false, sortable: false },
+        { text: 'Alias', value: false, sortable: false },
+        {
+          text: '¿Borrar?',
+          value: false,
+          sortable: false
+        }
       ],
       emptyTextRules: [
         v => !!v || 'Debe rellenar este campo'
@@ -86,20 +96,37 @@ export default {
       })
     },
     addAgent: function () {
+      db.collection('agents').add(this.newAgent)
+        .then((docRef) => {
+          this.fetchAgents()
+        },
+        function (err) {
+          alert('Error al insertar... ' + err.message)
+        })
+    },
+    cleanForm: function () {
+      this.newAgent = []
+    },
+    handleAgent: function () {
       if (this.$refs.form.validate()) {
-        db.collection('agents').add(this.newAgent)
-          .then((docRef) => {
-            this.fetchAgents()
-          },
-          function (err) {
-            alert('Error al insertar... ' + err.message)
+        db.collection('agents').where('idAgent', '==', this.newAgent.idAgent)
+          .get()
+          .then((querySnapshot) => {
+            if (querySnapshot.empty) {
+              this.addAgent()
+            } else {
+              alert('Existe un usuario con la misma identificación')
+            }
+          })
+          .catch((error) => {
+            console.error('Error al comprobar agente ', error)
           })
       }
     },
     fetchAgents: function () {
-      this.agents = []
       db.collection('agents').get()
         .then((querySnapshot) => {
+          this.agents = []
           querySnapshot.forEach((doc) => {
             this.agents.push({ docId: doc.id, data: doc.data() })
           })

@@ -35,6 +35,14 @@ let router = new Router({
       meta: {
         requiresAuth: true
       }
+    },
+    {
+      path: '/agents/:idAgent',
+      name: 'Agents',
+      component: Agents,
+      meta: {
+        requiresAuth: true
+      }
     }
   ]
 })
