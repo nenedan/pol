@@ -1,7 +1,7 @@
 <template>
-  <v-layout row justify-end>
+  <v-layout  row justify-end>
     <v-dialog v-model="active" fullscreen hide-overlay transition="dialog-bottom-transition">
-      <v-btn title="Insertar agente" slot="activator" fab small color="primary">
+      <v-btn title="Insertar agente" slot="activator" small color="primary">
         <v-icon>add</v-icon>
       </v-btn>
       <v-card>
@@ -92,6 +92,10 @@ export default {
     'active'
   ],
   created: function () {
+    alert('Created')
+  },
+  mounted: function () {
+    alert('Mounted')
   }
 }
 </script>
