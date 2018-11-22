@@ -28,16 +28,16 @@ let router = new Router({
       name: 'SignUp',
       component: SignUp
     },
-    {
+    /* {
       path: '/agents',
       name: 'Agents',
       component: Agents,
       meta: {
         requiresAuth: true
       }
-    },
+    }, */
     {
-      path: '/agents/:idAgent',
+      path: '/agents/:idAgent?',
       name: 'Agents',
       component: Agents,
       meta: {

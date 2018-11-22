@@ -44,7 +44,6 @@ export default {
   name: 'AgentAddDialog',
   data () {
     return {
-      active: false,
       agents: [],
       emptyTextRules: [
         v => !!v || 'Debe rellenar este campo'
@@ -89,6 +88,9 @@ export default {
       }
     }
   },
+  props: [
+    'active'
+  ],
   created: function () {
   }
 }

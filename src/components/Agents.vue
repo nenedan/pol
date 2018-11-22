@@ -12,7 +12,7 @@
   <v-container grid-list-md text-xs-center>
     <div>
       <v-toolbar flat>
-        <v-toolbar-title>Listado de agentes</v-toolbar-title>
+        <v-toolbar-title v-bind="active = true">Listado</v-toolbar-title>
         <agent-add-dialog></agent-add-dialog>
         <v-btn @click="fetchAgents()" title="Actualizar" outline fab small color="primary">
           <v-icon>refresh</v-icon>
@@ -35,6 +35,7 @@
             <v-icon
               small
               class="mr-2"
+              @click="editAgent(props.item.docId)"
             >
               edit
             </v-icon>
@@ -67,11 +68,11 @@ export default {
       alert: true,
       agents: [],
       headers: [
-        { text: 'Id', value: false, sortable: true },
-        { text: 'Nombre', value: false, sortable: false },
-        { text: 'Apellido 1', value: false, sortable: false },
-        { text: 'Apellido 2', value: false, sortable: false },
-        { text: 'Alias', value: false, sortable: false },
+        { text: 'Id', value: 'data.idAgent' },
+        { text: 'Nombre', value: 'data.name' },
+        { text: 'Apellido 1', value: 'data.surname' },
+        { text: 'Apellido 2', value: 'data.secondSurname' },
+        { text: 'Alias', value: 'data.alias' },
         {
           text: '¿Borrar?',
           align: 'right',
@@ -99,6 +100,10 @@ export default {
         this.$router.replace('login')
       })
     },
+    editAgent: function (docId) {
+      console.log('Editar agente' + docId)
+      this.$router.push({name: 'Agents', params: { idAgent: docId }})
+    },
     fetchAgents: function () {
       this.loading = true
       db.collection('agents').get()
@@ -120,7 +125,7 @@ export default {
         })
     }
   },
-  created: function () {
+  mounted: function () {
     this.fetchAgents()
   }
 }
