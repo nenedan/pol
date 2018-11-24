@@ -66,17 +66,17 @@
     </div>
   </v-container>
   <!-- Dialog -->
-  <v-layout  row justify-end>
+  <v-layout row justify-end>
     <v-dialog v-model="active" fullscreen hide-overlay transition="dialog-bottom-transition">
       <v-card>
         <v-toolbar dark color="primary">
-          <v-btn icon dark @click="active = false">
+          <v-btn icon dark @click="closeDialog()">
             <v-icon>close</v-icon>
           </v-btn>
           <v-toolbar-title>Formulario de alta</v-toolbar-title>
           <v-spacer></v-spacer>
           <v-toolbar-items>
-            <v-btn dark flat @click="active = false">Cerrar</v-btn>
+            <v-btn dark flat @click="closeDialog()">Cerrar</v-btn>
           </v-toolbar-items>
         </v-toolbar>
         <br><br>
@@ -88,7 +88,7 @@
             <v-text-field v-model="newAgent.secondSurname" :rules="emptyTextRules" label="Apellido 2" required></v-text-field>
             <v-text-field v-model.number="newAgent.idAgent" type="number" :rules="emptyTextRules" label="Identificación" required></v-text-field>
             <v-text-field v-model="newAgent.alias" :rules="emptyTextRules" label="Alias" required></v-text-field>
-            <v-btn v-if="editBtn" :disabled="!valid" @click="handleAgent">
+            <v-btn v-if="editBtn" :disabled="!valid" @click="updateAgent">
               Modificar
             </v-btn>
             <v-btn v-else :disabled="!valid" @click="addAgent">
@@ -97,6 +97,25 @@
             <v-btn @click="cleanForm">
               Limpiar
             </v-btn>
+            <v-snackbar
+              v-model="snackbar"
+              :bottom="bottom"
+              :left="left"
+              :multi-line="multi-line"
+              :right="right"
+              :timeout="5"
+              :top="top"
+              :vertical="vertical"
+            >
+              {{ text }}
+              <v-btn
+                color="pink"
+                flat
+                @click="snackbar = false"
+              >
+                Close
+              </v-btn>
+            </v-snackbar>
           </v-form>
         </v-flex>
       </v-card>
@@ -120,8 +139,9 @@ export default {
     return {
       active: false,
       agents: [],
-      alert: true,
+      snackbar: true,
       editBtn: false,
+      docIdToEdit: '',
       emptyTextRules: [
         v => !!v || 'Debe rellenar este campo'
       ],
@@ -153,19 +173,26 @@ export default {
   methods: {
     addAgent: function () {
       if (this.$refs.form.validate()) {
-        if (!this.existAgentId(this.newAgent.idAgent)) {
-          db.collection('agents').add(this.newAgent)
-            .then((docRef) => {
-              alert('Agente insertado correctamente')
-            },
-            function (err) {
-              alert('Error al insertar... ' + err.message)
-            })
-        }
+        db.collection('agents').add(this.newAgent)
+          .then((docRef) => {
+            alert('Agente insertado correctamente')
+          },
+          function (err) {
+            alert('Error al insertar... ' + err.message)
+          })
       }
     },
     cleanForm: function () {
       this.newAgent = {}
+      if (this.alert) {
+        this.alert = 0
+      } else {
+        this.alert = 1
+      }
+    },
+    closeDialog: function () {
+      this.fetchAgents()
+      this.active = false
     },
     deleteAgent: function (docId) {
       db.collection('agents').doc(docId).delete()
@@ -177,7 +204,7 @@ export default {
         })
     },
     /* Async function?? */
-    existAgentId: function (agentId) {
+    /* existAgentId: function (agentId) {
       db.collection('agents').where('idAgent', '==', agentId)
         .get()
         .then((querySnapshot) => {
@@ -192,7 +219,7 @@ export default {
         .catch((error) => {
           console.error('Error al comprobar Id de agente ', error)
         })
-    },
+    }, */
     logout: function () {
       Firebase.auth().signOut().then(() => {
         this.$router.replace('login')
@@ -202,6 +229,7 @@ export default {
       this.cleanForm()
       this.active = true
       this.editBtn = false
+      this.docIdToEdit = ''
     },
     formUpdateAgent: function (docId) {
       db.collection('agents').doc(docId)
@@ -211,6 +239,7 @@ export default {
             this.newAgent = doc.data()
             this.active = true
             this.editBtn = true
+            this.docIdToEdit = docId
           } else {
             alert('No existe usuario para editar')
           }
@@ -221,6 +250,7 @@ export default {
     },
     fetchAgents: function () {
       this.loading = true
+      this.search = ''
       db.collection('agents').get()
         .then((querySnapshot) => {
           this.agents = []
@@ -230,20 +260,14 @@ export default {
           this.loading = false
         })
     },
-    updateAgent: function (docId) {
-      db.collection('agents').doc(docId)
-        .get()
-        .then((doc) => {
-          if (doc.exists) {
-            this.newAgent = doc.data()
-            this.active = true
-            this.editBtn = true
-          } else {
-            alert('No existe usuario para editar')
-          }
+    updateAgent: function () {
+      db.collection('agents').doc(this.docIdToEdit)
+        .set(this.newAgent)
+        .then(() => {
+          alert('Actualizado correctamente')
         })
-        .catch((error) => {
-          console.error('Error al comprobar agente ', error)
+        .catch(() => {
+          alert('Error al actualizar')
         })
     }
   },
