@@ -2,10 +2,10 @@
 <div>
   <v-container>
     <v-layout  row justify-end>
-      <v-btn @click="fetchAgents()" title="Actualizar" small>
+      <v-btn @click="fetchRanges()" title="Actualizar" small>
         <v-icon>refresh</v-icon>
       </v-btn>
-      <v-btn title="Insertar agente" @click="formAddAgent()" small color="primary">
+      <v-btn title="Insertar rango" @click="formAddRange()" small color="primary">
         <v-icon>add</v-icon>
       </v-btn>
     </v-layout>
@@ -26,28 +26,26 @@
       <v-data-table
         :search="search"
         :headers="headers"
-        :items="agents"
+        :items="ranges"
         :loading="loading"
         class="elevation-1"
       >
         <v-progress-linear slot="progress" color="blue" indeterminate></v-progress-linear>
         <template slot="items" slot-scope="props">
-          <td class="text-xs-left">{{ props.item.data.idAgent }}</td>
+          <td class="text-xs-left">{{ props.item.data.level }}</td>
           <td class="text-xs-left">{{ props.item.data.name }}</td>
-          <td class="text-xs-left">{{ props.item.data.surname }}</td>
-          <td class="text-xs-left">{{ props.item.data.secondSurname }}</td>
-          <td class="text-xs-left">{{ props.item.data.alias }}</td>
+          <td class="text-xs-left">{{ props.item.data.printOrder }}</td>
           <td class="text-xs-right">
             <v-icon
               small
               class="mr-2"
-              @click="formUpdateAgent(props.item.docId)"
+              @click="formUpdateRange(props.item.docId)"
             >
               edit
             </v-icon>
             <v-icon
               small
-              @click="formDeleteAgent(props.item.docId)"
+              @click="formDeleteRange(props.item.docId)"
             >
               delete
             </v-icon>
@@ -72,9 +70,9 @@
       </v-btn>
     </v-snackbar>
   </v-container>
-  <!-- Agent Dialog -->
+  <!-- Range Dialog -->
   <v-layout row justify-end>
-    <v-dialog v-model="agentDialog" fullscreen hide-overlay transition="dialog-bottom-transition">
+    <v-dialog v-model="rangeDialog" fullscreen hide-overlay transition="dialog-bottom-transition">
       <v-card>
         <v-toolbar dark color="primary">
           <v-btn icon dark @click="closeDialog()">
@@ -90,19 +88,13 @@
         <h3 class="panel-title">Añadir ag</h3>
         <v-flex xs10 offset-xs1>
           <v-form ref="form" v-model="valid" lazy-validation>
-            <v-text-field v-model="newAgent.name" :rules="emptyTextRules" label="Nombre" required></v-text-field>
-            <v-text-field v-model="newAgent.surname" :rules="emptyTextRules" label="Apellido 1" required></v-text-field>
-            <v-text-field v-model="newAgent.secondSurname" :rules="emptyTextRules" label="Apellido 2" required></v-text-field>
-            <v-select
-              :items="ranges.data"
-              label="Standard"
-            ></v-select>
-            <v-text-field v-model.number="newAgent.idAgent" type="number" :rules="emptyTextRules" label="Identificación" required></v-text-field>
-            <v-text-field v-model="newAgent.alias" :rules="emptyTextRules" label="Alias" required></v-text-field>
-            <v-btn v-if="editBtn" :disabled="!valid" @click="updateAgent">
+            <v-text-field v-model="newRange.level" :rules="emptyTextRules" type="number" label="Jerarquía" required></v-text-field>
+            <v-text-field v-model="newRange.name" :rules="emptyTextRules" label="Nombre" required></v-text-field>
+            <v-text-field v-model="newRange.printOrder" :rules="emptyTextRules" type="number" label="Order de impresión" required></v-text-field>
+            <v-btn v-if="editBtn" :disabled="!valid" @click="updateRange">
               Modificar
             </v-btn>
-            <v-btn v-else :disabled="!valid" @click="addAgent">
+            <v-btn v-else :disabled="!valid" @click="addRange">
               Insertar
             </v-btn>
             <v-btn @click="cleanForm">
@@ -113,20 +105,19 @@
       </v-card>
     </v-dialog>
   </v-layout>
-  <!-- End Agent Dialog -->
+  <!-- End Range Dialog -->
   <!-- Delete Dialog -->
   <v-layout row justify-center>
     <v-dialog v-model="deleteDialog" persistent max-width="290">
       <v-card>
         <v-card-title class="headline">¿Desea borrar al usuario?</v-card-title>
           <v-btn color="primary" small @click="deleteDialog = false">Cancelar</v-btn>
-          <v-btn color="primary" small @click="deleteAgent()">Borrar</v-btn>
+          <v-btn color="primary" small @click="deleteRange()">Borrar</v-btn>
       </v-card>
     </v-dialog>
   </v-layout>
   <br>
   <!-- End Delete Dialog -->
-  {{ ranges }}
 </div>
 </template>
 
@@ -134,11 +125,11 @@
 import { db } from '../main'
 
 export default {
-  name: 'Agents',
+  name: 'Ranges',
   data () {
     return {
-      agentDialog: false,
-      agents: [],
+      rangeDialog: false,
+      ranges: [],
       editBtn: false,
       deleteDialog: false,
       docIdToDelete: '',
@@ -147,11 +138,9 @@ export default {
         v => !!v || 'Debe rellenar este campo'
       ],
       headers: [
-        { text: 'Id', value: 'data.idAgent' },
+        { text: 'Jerarquía', value: 'data.level' },
         { text: 'Nombre', value: 'data.name' },
-        { text: 'Apellido 1', value: 'data.surname' },
-        { text: 'Apellido 2', value: 'data.secondSurname' },
-        { text: 'Alias', value: 'data.alias' },
+        { text: 'Impresión', value: 'data.printOrder' },
         {
           text: 'Acciones',
           align: 'right',
@@ -160,14 +149,11 @@ export default {
         }
       ],
       loading: true,
-      newAgent: {
-        idAgent: '',
+      newRange: {
+        level: '',
         name: '',
-        secondSurname: '',
-        surname: '',
-        alias: ''
+        printOrder: ''
       },
-      ranges: [],
       search: '',
       snackbar: false,
       snackBarOpts: {},
@@ -175,11 +161,11 @@ export default {
     }
   },
   methods: {
-    addAgent: function () {
+    addRange: function () {
       if (this.$refs.form.validate()) {
-        db.collection('agents').add(this.newAgent)
+        db.collection('ranges').add(this.newRange)
           .then((docRef) => {
-            this.snackBarOpts = { color: 'success', timeout: 5000, text: 'Agente insertado correctamente', y: 'top', x: 'right' }
+            this.snackBarOpts = { color: 'success', timeout: 5000, text: 'Rangee insertado correctamente', y: 'top', x: 'right' }
             this.snackbar = true
           },
           function (err) {
@@ -188,7 +174,7 @@ export default {
       }
     },
     cleanForm: function () {
-      this.newAgent = {}
+      this.newRange = {}
       if (this.alert) {
         this.alert = 0
       } else {
@@ -196,38 +182,38 @@ export default {
       }
     },
     closeDialog: function () {
-      this.fetchAgents()
-      this.agentDialog = false
+      this.fetchRanges()
+      this.rangeDialog = false
     },
-    deleteAgent: function () {
-      db.collection('agents').doc(this.docIdToDelete).delete()
+    deleteRange: function () {
+      db.collection('ranges').doc(this.docIdToDelete).delete()
         .then(() => {
-          this.snackBarOpts = { color: 'success', timeout: 5000, text: 'Agente borrado correctamente', y: 'top', x: 'right' }
+          this.snackBarOpts = { color: 'success', timeout: 5000, text: 'Rangee borrado correctamente', y: 'top', x: 'right' }
           this.snackbar = true
-          this.fetchAgents()
+          this.fetchRanges()
           this.deleteDialog = false
         })
         .catch((error) => {
           console.error('Error removing document: ', error)
         })
     },
-    formAddAgent: function () {
+    formAddRange: function () {
       this.cleanForm()
-      this.agentDialog = true
+      this.rangeDialog = true
       this.editBtn = false
       this.docIdToEdit = ''
     },
-    formDeleteAgent: function (docId) {
+    formDeleteRange: function (docId) {
       this.docIdToDelete = docId
       this.deleteDialog = true
     },
-    formUpdateAgent: function (docId) {
-      db.collection('agents').doc(docId)
+    formUpdateRange: function (docId) {
+      db.collection('ranges').doc(docId)
         .get()
         .then((doc) => {
           if (doc.exists) {
-            this.newAgent = doc.data()
-            this.agentDialog = true
+            this.newRange = doc.data()
+            this.rangeDialog = true
             this.editBtn = true
             this.docIdToEdit = docId
           } else {
@@ -235,35 +221,26 @@ export default {
           }
         })
         .catch((error) => {
-          console.error('Error al comprobar agente ', error)
-        })
-    },
-    fetchAgents: function () {
-      this.loading = true
-      this.search = ''
-      db.collection('agents').get()
-        .then((querySnapshot) => {
-          this.agents = []
-          querySnapshot.forEach((doc) => {
-            this.agents.push({ docId: doc.id, data: doc.data() })
-          })
-          this.loading = false
+          console.error('Error al comprobar rango ', error)
         })
     },
     fetchRanges: function () {
+      this.loading = true
+      this.search = ''
       db.collection('ranges').get()
         .then((querySnapshot) => {
           this.ranges = []
           querySnapshot.forEach((doc) => {
             this.ranges.push({ docId: doc.id, data: doc.data() })
           })
+          this.loading = false
         })
     },
-    updateAgent: function () {
-      db.collection('agents').doc(this.docIdToEdit)
-        .set(this.newAgent)
+    updateRange: function () {
+      db.collection('ranges').doc(this.docIdToEdit)
+        .set(this.newRange)
         .then(() => {
-          this.snackBarOpts = { color: 'success', timeout: 5000, text: 'Agente actualizado correctamente', y: 'top', x: 'right' }
+          this.snackBarOpts = { color: 'success', timeout: 5000, text: 'Rangee actualizado correctamente', y: 'top', x: 'right' }
           this.snackbar = true
         })
         .catch(() => {
@@ -272,8 +249,12 @@ export default {
     }
   },
   mounted: function () {
-    this.fetchAgents()
-    this.fetchRanges()
+    let idRange = this.$route.params['idRange']
+    if (idRange) {
+      // this.rangeDialog = true
+    } else {
+      this.fetchRanges()
+    }
   }
 }
 </script>

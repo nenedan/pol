@@ -53,17 +53,12 @@ export default {
   methods: {
     signIn: function () {
       if (this.$refs.form.validate()) {
-        var that = this /* Check this */
         Firebase.auth().signInWithEmailAndPassword(this.email, this.password)
-          .then(
-            function (user) {
-              alert('Te has conectado correctamente')
-              that.$router.replace('agents')
-            },
-            function (err) {
-              alert('Al ha salido mal... ' + err.message)
-            }
-          )
+          .then((user) => {
+            location.reload(true)
+          }, (err) => {
+            alert('Al ha salido mal... ' + err.message)
+          })
       }
     }
   }

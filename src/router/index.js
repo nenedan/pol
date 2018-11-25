@@ -3,6 +3,8 @@ import Router from 'vue-router'
 import Agents from '@/components/Agents'
 import Login from '@/components/Login'
 import SignUp from '@/components/SignUp'
+import Home from '@/components/Home'
+import Ranges from '@/components/Ranges'
 import Firebase from 'firebase'
 
 Vue.use(Router)
@@ -28,18 +30,26 @@ let router = new Router({
       name: 'SignUp',
       component: SignUp
     },
-    /* {
-      path: '/agents',
+    {
+      path: '/home',
+      name: 'Home',
+      component: Home,
+      meta: {
+        requiresAuth: true
+      }
+    },
+    {
+      path: '/agents/:idAgent?',
       name: 'Agents',
       component: Agents,
       meta: {
         requiresAuth: true
       }
-    }, */
+    },
     {
-      path: '/agents/:idAgent?',
-      name: 'Agents',
-      component: Agents,
+      path: '/ranges/:idAgent?',
+      name: 'Ranges',
+      component: Ranges,
       meta: {
         requiresAuth: true
       }
@@ -54,7 +64,7 @@ router.beforeEach((to, from, next) => {
   if (requiresAuth && !currentUser) {
     next('login')
   } else if (!requiresAuth && currentUser) {
-    next('hello')
+    next('home')
   } else {
     next()
   }
