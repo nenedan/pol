@@ -1,6 +1,7 @@
 <template>
 <div>
   <v-container>
+    <br>
     <v-layout  row justify-end>
       <v-btn @click="fetchRanges()" title="Actualizar" small>
         <v-icon>refresh</v-icon>
@@ -24,6 +25,8 @@
         ></v-text-field>
       </v-toolbar>
       <v-data-table
+        rows-per-page-text="Filas por página"
+        :rows-per-page-items="pagination"
         :search="search"
         :headers="headers"
         :items="ranges"
@@ -51,6 +54,9 @@
             </v-icon>
           </td>
         </template>
+        <template slot="pageText" slot-scope="props">
+          Filas {{ props.pageStart }} - {{ props.pageStop }} de {{ props.itemsLength }}
+        </template>
       </v-data-table>
     </div>
     <v-snackbar
@@ -69,6 +75,7 @@
         Cerrar
       </v-btn>
     </v-snackbar>
+    {{ ranges }}
   </v-container>
   <!-- Range Dialog -->
   <v-layout row justify-end>
@@ -154,6 +161,7 @@ export default {
         name: '',
         printOrder: ''
       },
+      pagination: [10, 20, {'text': 'Todos', 'value': -1}],
       search: '',
       snackbar: false,
       snackBarOpts: {},
@@ -185,16 +193,25 @@ export default {
       this.fetchRanges()
       this.rangeDialog = false
     },
-    deleteRange: function () {
-      db.collection('ranges').doc(this.docIdToDelete).delete()
-        .then(() => {
-          this.snackBarOpts = { color: 'success', timeout: 5000, text: 'Rangee borrado correctamente', y: 'top', x: 'right' }
-          this.snackbar = true
-          this.fetchRanges()
-          this.deleteDialog = false
-        })
-        .catch((error) => {
-          console.error('Error removing document: ', error)
+    async deleteRange () {
+      await this.existAgentsByRange(this.docIdToDelete)
+        .then((querySnapshot) => {
+          if (querySnapshot.size > 0) {
+            this.snackBarOpts = { color: 'error', timeout: 5000, text: 'No se puede borrar el rango ya que tiene agentes asignados', y: 'top', x: 'right' }
+            this.snackbar = true
+            this.deleteDialog = false
+          } else {
+            db.collection('ranges').doc(this.docIdToDelete).delete()
+              .then(() => {
+                this.snackBarOpts = { color: 'success', timeout: 5000, text: 'Rangee borrado correctamente', y: 'top', x: 'right' }
+                this.snackbar = true
+                this.fetchRanges()
+                this.deleteDialog = false
+              })
+              .catch((error) => {
+                console.error('Error removing document: ', error)
+              })
+          }
         })
     },
     formAddRange: function () {
@@ -246,9 +263,13 @@ export default {
         .catch(() => {
           alert('Error al actualizar')
         })
+    },
+    existAgentsByRange: function (docRange) {
+      return db.collection('agents').where('range', '==', docRange).get()
     }
   },
   mounted: function () {
+    this.existAgentsByRange('Nb7UpwgsKSDXMAib4qjN')
     let idRange = this.$route.params['idRange']
     if (idRange) {
       // this.rangeDialog = true
@@ -257,6 +278,7 @@ export default {
     }
   }
 }
+
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->

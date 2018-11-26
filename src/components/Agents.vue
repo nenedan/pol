@@ -1,6 +1,7 @@
 <template>
 <div>
   <v-container>
+    <br>
     <v-layout  row justify-end>
       <v-btn @click="fetchAgents()" title="Actualizar" small>
         <v-icon>refresh</v-icon>
@@ -24,6 +25,8 @@
         ></v-text-field>
       </v-toolbar>
       <v-data-table
+        rows-per-page-text="Filas por página"
+        :rows-per-page-items="pagination"
         :search="search"
         :headers="headers"
         :items="agents"
@@ -52,6 +55,9 @@
               delete
             </v-icon>
           </td>
+        </template>
+        <template slot="pageText" slot-scope="props">
+          Filas {{ props.pageStart }} - {{ props.pageStop }} de {{ props.itemsLength }}
         </template>
       </v-data-table>
     </div>
@@ -94,8 +100,14 @@
             <v-text-field v-model="newAgent.surname" :rules="emptyTextRules" label="Apellido 1" required></v-text-field>
             <v-text-field v-model="newAgent.secondSurname" :rules="emptyTextRules" label="Apellido 2" required></v-text-field>
             <v-select
-              :items="ranges.data"
-              label="Standard"
+              v-model="newAgent.range"
+              :hint="`${select.docId}, ${select.name}`"
+              :items="ranges"
+              item-text="name"
+              item-value="docId"
+              label="Seleccione rango"
+              persistent-hint
+              hide-details
             ></v-select>
             <v-text-field v-model.number="newAgent.idAgent" type="number" :rules="emptyTextRules" label="Identificación" required></v-text-field>
             <v-text-field v-model="newAgent.alias" :rules="emptyTextRules" label="Alias" required></v-text-field>
@@ -109,6 +121,7 @@
               Limpiar
             </v-btn>
           </v-form>
+          {{ newAgent }}
         </v-flex>
       </v-card>
     </v-dialog>
@@ -126,7 +139,6 @@
   </v-layout>
   <br>
   <!-- End Delete Dialog -->
-  {{ ranges }}
 </div>
 </template>
 
@@ -163,12 +175,15 @@ export default {
       newAgent: {
         idAgent: '',
         name: '',
+        range: '',
         secondSurname: '',
         surname: '',
         alias: ''
       },
+      pagination: [10, 20, {'text': 'Todos', 'value': -1}],
       ranges: [],
       search: '',
+      select: { docId: '', name: '' },
       snackbar: false,
       snackBarOpts: {},
       valid: true
@@ -255,7 +270,7 @@ export default {
         .then((querySnapshot) => {
           this.ranges = []
           querySnapshot.forEach((doc) => {
-            this.ranges.push({ docId: doc.id, data: doc.data() })
+            this.ranges.push({ docId: doc.id, name: doc.data().name })
           })
         })
     },
