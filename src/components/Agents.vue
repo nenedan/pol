@@ -40,6 +40,7 @@
           <td class="text-xs-left">{{ props.item.data.surname }}</td>
           <td class="text-xs-left">{{ props.item.data.secondSurname }}</td>
           <td class="text-xs-left">{{ props.item.data.alias }}</td>
+          <td class="text-xs-left">{{ props.item.data.range }}</td>
           <td class="text-xs-right">
             <v-icon
               small
@@ -164,6 +165,7 @@ export default {
         { text: 'Apellido 1', value: 'data.surname' },
         { text: 'Apellido 2', value: 'data.secondSurname' },
         { text: 'Alias', value: 'data.alias' },
+        { text: 'Rango', value: 'data.range' },
         {
           text: 'Acciones',
           align: 'right',
@@ -272,6 +274,18 @@ export default {
           querySnapshot.forEach((doc) => {
             this.ranges.push({ docId: doc.id, name: doc.data().name })
           })
+        })
+    },
+    getRange: function (range) {
+      db.collection('range').doc(range)
+        .get()
+        .then((doc) => {
+          if (doc.exists) {
+            console.log(doc)
+            return doc.data().name
+          } else {
+            return ''
+          }
         })
     },
     updateAgent: function () {
