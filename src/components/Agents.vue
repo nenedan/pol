@@ -198,6 +198,7 @@ export default {
           .then((docRef) => {
             this.snackBarOpts = { color: 'success', timeout: 5000, text: 'Agente insertado correctamente', y: 'top', x: 'right' }
             this.snackbar = true
+            this.cleanForm()
           },
           function (err) {
             alert('Error al insertar... ' + err.message)
@@ -206,11 +207,6 @@ export default {
     },
     cleanForm: function () {
       this.newAgent = {}
-      if (this.alert) {
-        this.alert = 0
-      } else {
-        this.alert = 1
-      }
     },
     closeDialog: function () {
       this.fetchAgents()

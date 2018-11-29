@@ -269,13 +269,7 @@ export default {
     }
   },
   mounted: function () {
-    this.existAgentsByRange('Nb7UpwgsKSDXMAib4qjN')
-    let idRange = this.$route.params['idRange']
-    if (idRange) {
-      // this.rangeDialog = true
-    } else {
-      this.fetchRanges()
-    }
+    this.fetchRanges()
   }
 }
 
