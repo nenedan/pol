@@ -5,6 +5,7 @@ import Login from '@/components/Login'
 import SignUp from '@/components/SignUp'
 import Home from '@/components/Home'
 import Ranges from '@/components/Ranges'
+import GoogleMapLoader from '@/components/GoogleMapLoader'
 import Firebase from 'firebase'
 
 Vue.use(Router)
@@ -50,6 +51,14 @@ let router = new Router({
       path: '/ranges/:idAgent?',
       name: 'Ranges',
       component: Ranges,
+      meta: {
+        requiresAuth: true
+      }
+    },
+    {
+      path: '/maps',
+      name: 'GoogleMapLoader',
+      component: GoogleMapLoader,
       meta: {
         requiresAuth: true
       }

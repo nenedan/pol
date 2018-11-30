@@ -15,7 +15,7 @@ Vue.use(Vuetify)
 let app
 // Initialize Firebase
 let config = {
-  apiKey: process.env.API_KEY,
+  apiKey: process.env.API_KEY_FIREBASE,
   authDomain: 'poli-c41fc.firebaseapp.com',
   databaseURL: 'https://poli-c41fc.firebaseio.com',
   projectId: 'poli-c41fc',
