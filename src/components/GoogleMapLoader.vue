@@ -1,47 +1,19 @@
 <template>
-  <div>
-    <div class="google-map" ref="googleMap"></div>
-    <template v-if="Boolean(this.google) && Boolean(this.map)">
-      <slot
-        :google="google"
-        :map="map"
-      />
-    </template>
-  </div>
+  <GmapMap
+    :center="{lat:10, lng:10}"
+    :zoom="7"
+    map-type-id="hybrid"
+    style="width: 100%; height: 100%"
+  >
+    <GmapMarker
+      :key="index"
+      v-for="(m, index) in markers"
+      :position="m.position"
+      :clickable="true"
+      :draggable="true"
+      @click="center=m.position"
+    />
+  </GmapMap>
 </template>
-
 <script>
-import GoogleMapsApiLoader from 'google-maps-api-loader'
-
-export default {
-  name: 'GoogleMapLoader',
-  props: {
-    mapConfig: Object,
-    apiKey: process.env.API_KEY_MAPS
-  },
-
-  data () {
-    return {
-      google: null,
-      map: null
-    }
-  },
-
-  async mounted () {
-    const googleMapApi = await GoogleMapsApiLoader({
-      apiKey: this.apiKey
-    })
-    this.google = googleMapApi
-    this.initializeMap()
-  },
-
-  methods: {
-    initializeMap () {
-      const mapContainer = this.$refs.googleMap
-      this.map = new this.google.maps.Map(
-        mapContainer, this.mapConfig
-      )
-    }
-  }
-}
 </script>

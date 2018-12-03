@@ -8,6 +8,13 @@ import Firebase from 'firebase'
 import Vuefire from 'vuefire'
 import Vuetify from 'vuetify'
 import 'vuetify/dist/vuetify.min.css'
+import * as VueGoogleMaps from 'vue2-google-maps'
+
+Vue.use(VueGoogleMaps, {
+  load: {
+    key: process.env.API_KEY_MAPS
+  }
+})
 
 Vue.config.productionTip = false
 Vue.use(Vuefire)

@@ -58,7 +58,8 @@ export default {
       items: [
         { icon: 'dashboard', path: 'home', title: 'Inicio' },
         { icon: 'face', path: 'agents', title: 'Agentes' },
-        { icon: 'security', path: 'ranges', title: 'Rangos' }
+        { icon: 'security', path: 'ranges', title: 'Rangos' },
+        { icon: 'maps', path: 'maps', title: 'Maps' }
       ],
       navShow: false
     }
