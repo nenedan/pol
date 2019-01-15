@@ -13,8 +13,7 @@
     <div>
       <v-toolbar flat>
         <v-toolbar-title>Listado</v-toolbar-title>
-              <v-spacer></v-spacer>
-
+        <v-spacer></v-spacer>
         <v-text-field
           placeholder="Buscar"
           v-model="search"

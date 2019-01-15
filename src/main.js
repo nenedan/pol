@@ -9,16 +9,24 @@ import Vuefire from 'vuefire'
 import Vuetify from 'vuetify'
 import 'vuetify/dist/vuetify.min.css'
 import * as VueGoogleMaps from 'vue2-google-maps'
+import VCalendar from 'v-calendar'
+import 'v-calendar/lib/v-calendar.min.css'
 
-Vue.use(VueGoogleMaps, {
-  load: {
-    key: process.env.API_KEY_MAPS
+Vue.use(
+  VueGoogleMaps, {
+    load: {
+      key: process.env.API_KEY_MAPS
+    }
   }
-})
+)
 
 Vue.config.productionTip = false
 Vue.use(Vuefire)
 Vue.use(Vuetify)
+Vue.use(VCalendar, {
+  firstDayOfWeek: 2
+})
+
 let app
 // Initialize Firebase
 let config = {

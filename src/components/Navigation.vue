@@ -13,7 +13,7 @@
       <v-list class="pa-1">
         <v-list-tile avatar>
           <v-list-tile-avatar>
-            <img src="https://randomuser.me/api/portraits/men/85.jpg">
+            <img src="https://randomuser.me/api/portraits/men/86.jpg">
           </v-list-tile-avatar>
 
           <v-list-tile-content>
@@ -59,7 +59,8 @@ export default {
         { icon: 'dashboard', path: 'home', title: 'Inicio' },
         { icon: 'face', path: 'agents', title: 'Agentes' },
         { icon: 'security', path: 'ranges', title: 'Rangos' },
-        { icon: 'maps', path: 'maps', title: 'Maps' }
+        { icon: 'maps', path: 'maps', title: 'Maps' },
+        { icon: 'event', path: 'calendar', title: 'Calendario' }
       ],
       navShow: false
     }

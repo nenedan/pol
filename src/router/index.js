@@ -6,6 +6,7 @@ import SignUp from '@/components/SignUp'
 import Home from '@/components/Home'
 import Ranges from '@/components/Ranges'
 import GoogleMapLoader from '@/components/GoogleMapLoader'
+import VCalendar from '@/components/VCalendar'
 import Firebase from 'firebase'
 
 Vue.use(Router)
@@ -59,6 +60,14 @@ let router = new Router({
       path: '/maps',
       name: 'GoogleMapLoader',
       component: GoogleMapLoader,
+      meta: {
+        requiresAuth: true
+      }
+    },
+    {
+      path: '/calendar',
+      name: 'VCalendar',
+      component: VCalendar,
       meta: {
         requiresAuth: true
       }
